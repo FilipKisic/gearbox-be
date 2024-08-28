@@ -14,6 +14,13 @@ interface AuthenticationWebFacade {
     fun signIn(request: AuthenticationRequestDto): AuthenticationResponseDto
 
     /**
+     * Function gets sign up request which then validates to see if it already exists and returns the user if new
+     * @property [request] contains user credentials
+     * @return [Unit] if credentials are valid and user doesn't exist yet, else returns error message
+     */
+    fun validateNewUser(request: AuthenticationRequestDto)
+
+    /**
      * Function gets sign up request from the user with credentials and returns token with created user data
      * @property [request] contains user credentials
      * @return token and created user if credentials are valid and user doesn't exist yet, else returns error message
@@ -24,6 +31,7 @@ interface AuthenticationWebFacade {
      * Function gets refresh token request and returns new access token
      * @property [request] contains old access token
      * @return new access token along with refresh token, else returns error message
+     * @throws InvalidOrExpiredTokenException if token is invalid or expired
      */
     fun refreshToken(request: RefreshTokenRequestDto): RefreshTokenResponseDto
 }

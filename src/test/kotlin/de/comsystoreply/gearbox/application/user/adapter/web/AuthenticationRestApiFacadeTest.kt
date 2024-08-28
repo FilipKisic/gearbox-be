@@ -5,6 +5,7 @@ import de.comsystoreply.gearbox.application.security.repository.RefreshTokenRepo
 import de.comsystoreply.gearbox.application.security.service.TokenService
 import de.comsystoreply.gearbox.application.user.adapter.api.auth.UserSignInUseCase
 import de.comsystoreply.gearbox.application.user.adapter.api.auth.UserSignUpUseCase
+import de.comsystoreply.gearbox.application.user.adapter.api.auth.ValidateNewUserUseCase
 import de.comsystoreply.gearbox.application.user.model.UserEntity
 import de.comsystoreply.gearbox.application.user.port.web.AuthenticationRequestDto
 import de.comsystoreply.gearbox.application.user.port.web.AuthenticationResponseDto
@@ -24,6 +25,7 @@ class AuthenticationRestApiFacadeTest {
 
     private lateinit var userSignInUseCase: UserSignInUseCase
     private lateinit var userSignUpUseCase: UserSignUpUseCase
+    private lateinit var validateNewUserUseCase: ValidateNewUserUseCase
     private lateinit var authenticationRestApiFacade: AuthenticationRestApiFacade
     private lateinit var tokenService: TokenService
     private lateinit var jwtProperties: JwtProperties
@@ -34,12 +36,14 @@ class AuthenticationRestApiFacadeTest {
     fun setUp() {
         userSignInUseCase = mockk()
         userSignUpUseCase = mockk()
+        validateNewUserUseCase = mockk()
         tokenService = mockk()
         jwtProperties = mockk()
         refreshTokenRepository = mockk()
         authenticationRestApiFacade = AuthenticationRestApiFacade(
             userSignInUseCase,
             userSignUpUseCase,
+            validateNewUserUseCase,
             tokenService,
             jwtProperties,
             refreshTokenRepository,
@@ -83,6 +87,33 @@ class AuthenticationRestApiFacadeTest {
     }
 
     @Test
+    fun `validateNewUser should pass on valid AuthenticationRequestDto`() {
+        val email = "test@example.com"
+        val password = "ValidPass123!"
+        val requestDto = AuthenticationRequestDto(email = email, password = password)
+
+        every { validateNewUserUseCase.execute(requestDto) } returns Unit
+
+        authenticationRestApiFacade.validateNewUser(requestDto)
+
+        verify { validateNewUserUseCase.execute(requestDto) }
+    }
+
+    @Test
+    fun `validateNewUser should throw UserAlreadyExistsException when user already exists`() {
+        val email = "test@example.com"
+        val password = "ValidPass123!"
+        val requestDto = AuthenticationRequestDto(email = email, password = password)
+
+        every { validateNewUserUseCase.execute(requestDto) } throws UserAlreadyExistsException("User already exists.")
+
+        val exception = assertThrows<UserAlreadyExistsException> { authenticationRestApiFacade.validateNewUser(requestDto) }
+
+        assertEquals(exception.message, "User already exists.")
+        verify { validateNewUserUseCase.execute(requestDto) }
+    }
+
+    @Test
     fun `signUp should return AuthenticationResponseDto on valid AuthenticationRequestDto`() {
         val email = "test@example.com"
         val password = "ValidPass123!"
@@ -102,19 +133,5 @@ class AuthenticationRestApiFacadeTest {
         verify { userSignUpUseCase.execute(requestDto) }
         verify { tokenService.generate(any(), any()) }
         verify { refreshTokenRepository.save(any(), any()) }
-    }
-
-    @Test
-    fun `signUp should throw UserAlreadyExistsException when user already exists`() {
-        val email = "test@example.com"
-        val password = "ValidPass123!"
-        val requestDto = AuthenticationRequestDto(email = email, password = password)
-
-        every { userSignUpUseCase.execute(requestDto) } throws UserAlreadyExistsException("User already exists.")
-
-        val exception = assertThrows<UserAlreadyExistsException> { authenticationRestApiFacade.signUp(requestDto) }
-
-        assertEquals(exception.message, "User already exists.")
-        verify { userSignUpUseCase.execute(requestDto) }
     }
 }

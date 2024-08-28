@@ -19,6 +19,12 @@ class AuthenticationController(
         return ResponseEntity(response, HttpStatus.OK)
     }
 
+    @PostMapping("/validateNewUser")
+    fun validateNewUser(@RequestBody authenticationRequestDto: AuthenticationRequestDto): ResponseEntity<Unit> {
+        webFacade.validateNewUser(authenticationRequestDto)
+        return ResponseEntity(HttpStatus.OK)
+    }
+
     @PostMapping("/signUp")
     fun signUp(@RequestBody authenticationRequestDto: AuthenticationRequestDto): ResponseEntity<AuthenticationResponseDto> {
         val response = webFacade.signUp(authenticationRequestDto)

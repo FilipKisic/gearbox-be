@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class UserSignInUseCase(private val userApi: UserApiFacade) {
-    fun execute(request: AuthenticationRequestDto): UserEntity {
-        return UserEntity.fromDomain(userApi.signIn(request.toDomain()))
-    }
+    fun execute(request: AuthenticationRequestDto): UserEntity =
+        UserEntity.fromDomain(userApi.signIn(request.toDomain()))
 }

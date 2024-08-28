@@ -32,6 +32,8 @@ interface UserApiFacade {
      */
     fun signIn(details: UserInputDetails): User
 
+    fun validateNewUser(details: UserInputDetails)
+
     /**
      * Function gets new user data, validate credentials, checks if user exists and returns the newly created User
      *

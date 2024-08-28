@@ -27,7 +27,13 @@ class UserSignInUseCaseTest {
     @Test
     fun `sign in should return user on valid input`() {
         val request = AuthenticationRequestDto(email = "test@example.com", password = "ValidPass123!")
-        val domainUser = User("id", "test@example.com", "test", "ValidPass123!", null)
+        val domainUser = User(
+            "id",
+            "test@example.com",
+            "test",
+            "ValidPass123!",
+            null
+        )
         val expectedUser = UserEntity.fromDomain(domainUser)
 
         every { userApiFacade.signIn(any()) } returns domainUser

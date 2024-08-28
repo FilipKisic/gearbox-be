@@ -2,12 +2,16 @@ package de.comsystoreply.gearbox.domain.user.domain
 
 import de.comsystoreply.gearbox.domain.user.model.User
 import de.comsystoreply.gearbox.domain.user.port.api.*
+import de.comsystoreply.gearbox.domain.user.port.persistance.ImageRepository
 import de.comsystoreply.gearbox.domain.user.port.persistance.UserRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class UserService(private val userRepository: UserRepository) : UserApiFacade {
+class UserService(
+    private val userRepository: UserRepository,
+    private val imageRepository: ImageRepository
+) : UserApiFacade {
 
     override fun findByEmailAndPassword(email: String, password: String): User =
         userRepository.findByEmailAndPassword(email, password) ?: throw UserNotFoundException("User is not found.")
@@ -22,10 +26,15 @@ class UserService(private val userRepository: UserRepository) : UserApiFacade {
             ?: throw UserNotFoundException("User is not found.")
     }
 
-    override fun signUp(details: UserInputDetails): User {
+    override fun validateNewUser(details: UserInputDetails) {
         validateUserDoesntExist(details)
         validatePasswordMatching(details)
         validateBasicCredentials(details.email, details.password)
+    }
+
+    override fun signUp(details: UserInputDetails): User {
+        validateImage()
+        //TODO: val profileImageUrl = imageRepository.save()
 
         val user = User(
             id = UUID.randomUUID().toString(),
@@ -52,9 +61,10 @@ class UserService(private val userRepository: UserRepository) : UserApiFacade {
     }
 
     private fun validateUserDoesntExist(details: UserInputDetails) {
-        val possibleUser = userRepository.findByEmail(details.email)
+        val userWithSameEmail = userRepository.findByEmail(details.email)
+        val userWithSameUsername = userRepository.findByUsername(details.username!!)
 
-        if (possibleUser != null) {
+        if (userWithSameEmail != null || userWithSameUsername != null) {
             throw UserAlreadyExistsException("User already exists.")
         }
     }
@@ -64,6 +74,10 @@ class UserService(private val userRepository: UserRepository) : UserApiFacade {
         if (passwordsDoNotMatch) {
             throw PasswordMismatchException("Passwords do not match.")
         }
+    }
+
+    private fun validateImage() {
+
     }
 }
 

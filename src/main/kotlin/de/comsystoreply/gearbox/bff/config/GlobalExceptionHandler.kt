@@ -13,17 +13,13 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFoundException(ex: UserNotFoundException): ResponseEntity<ExceptionMessage> {
-        val exceptionMessage = ExceptionMessage(
-            message = ex.message,
-        )
+        val exceptionMessage = ExceptionMessage(message = ex.message)
         return ResponseEntity(exceptionMessage, HttpStatus.NOT_FOUND)
     }
 
     @ExceptionHandler
     fun handleAuthenticationException(ex: UserException): ResponseEntity<ExceptionMessage> {
-        val exceptionMessage = ExceptionMessage(
-            message = ex.message,
-        )
+        val exceptionMessage = ExceptionMessage(message = ex.message)
         return ResponseEntity(exceptionMessage, HttpStatus.BAD_REQUEST)
     }
 }

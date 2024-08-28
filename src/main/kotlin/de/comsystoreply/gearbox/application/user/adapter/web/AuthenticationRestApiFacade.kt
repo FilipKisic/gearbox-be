@@ -5,6 +5,7 @@ import de.comsystoreply.gearbox.application.security.repository.RefreshTokenRepo
 import de.comsystoreply.gearbox.application.security.service.TokenService
 import de.comsystoreply.gearbox.application.user.adapter.api.auth.UserSignInUseCase
 import de.comsystoreply.gearbox.application.user.adapter.api.auth.UserSignUpUseCase
+import de.comsystoreply.gearbox.application.user.adapter.api.auth.ValidateNewUserUseCase
 import de.comsystoreply.gearbox.application.user.model.UserEntity
 import de.comsystoreply.gearbox.application.user.port.web.*
 import org.springframework.stereotype.Service
@@ -14,6 +15,7 @@ import java.util.*
 class AuthenticationRestApiFacade(
     private val userSignInUseCase: UserSignInUseCase,
     private val userSignUpUseCase: UserSignUpUseCase,
+    private val validateNewUserUseCase: ValidateNewUserUseCase,
     private val tokenService: TokenService,
     private val jwtProperties: JwtProperties,
     private val refreshTokenRepository: RefreshTokenRepository,
@@ -22,6 +24,10 @@ class AuthenticationRestApiFacade(
     override fun signIn(request: AuthenticationRequestDto): AuthenticationResponseDto {
         val user = userSignInUseCase.execute(request)
         return createResponse(user)
+    }
+
+    override fun validateNewUser(request: AuthenticationRequestDto) {
+        validateNewUserUseCase.execute(request)
     }
 
     override fun signUp(request: AuthenticationRequestDto): AuthenticationResponseDto {
